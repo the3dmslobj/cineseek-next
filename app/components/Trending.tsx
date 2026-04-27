@@ -25,7 +25,7 @@ type Credits = {
   }[];
 };
 
-const HERO_COUNT = 4;
+const HERO_COUNT = 5;
 
 function fmtRuntime(minutes: number | undefined): string | undefined {
   if (!minutes) return undefined;

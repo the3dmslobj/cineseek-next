@@ -52,7 +52,7 @@ export default function TrendingHero({ items }: { items: HeroItem[] }) {
             {item.title}.
           </h1>
           <p
-            className="text-[15px] leading-relaxed max-w-xl mb-6"
+            className="text-[15px] leading-relaxed max-w-xl mb-6 line-clamp-5"
             style={{ color: "var(--ink-2)", minHeight: "5em" }}
           >
             {item.overview}
@@ -76,7 +76,7 @@ export default function TrendingHero({ items }: { items: HeroItem[] }) {
             </Link>
           </div>
         </div>
-        <div className="md:col-span-4 flex md:justify-end">
+        <div className="md:col-span-4 flex justify-center md:justify-end">
           <div
             className="frame p-3 w-full max-w-72"
             style={{ background: "var(--panel)" }}
