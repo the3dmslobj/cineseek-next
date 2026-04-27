@@ -10,7 +10,6 @@ config.autoAddCss = false;
 export const metadata: Metadata = {
   title: "Cineseek",
   description: "Browse trending movies and TV shows powered by TMDB.",
-  icons: { icon: "/cineseek-logo-black.svg" },
 };
 
 export default function RootLayout({
