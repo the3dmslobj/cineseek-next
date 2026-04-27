@@ -203,7 +203,7 @@ export default async function DetailsPage({
               <Link
                 key={c.id}
                 href={`/person/${c.id}`}
-                className="frame p-3 shrink-0"
+                className="pcard p-3 shrink-0"
                 style={{ width: 160, background: "var(--panel)" }}
               >
                 <div
