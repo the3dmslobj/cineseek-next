@@ -76,9 +76,9 @@ export default function TrendingHero({ items }: { items: HeroItem[] }) {
             </Link>
           </div>
         </div>
-        <div className="md:col-span-4">
+        <div className="md:col-span-4 flex md:justify-end">
           <div
-            className="frame p-3"
+            className="frame p-3 w-full max-w-72"
             style={{ background: "var(--panel)" }}
           >
             <div className="poster">
