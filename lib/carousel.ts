@@ -1,69 +1,26 @@
-type CarouselOptions = {
-  track: HTMLElement;
-  cardCount: number;
-  cardWidth: number;
-  slideMilliSec: number;
+import { useEffect, useRef, useState } from "react";
+
+type UseCarouselOptions = {
+  itemCount: number;
+  intervalMs: number;
+  enabled?: boolean;
 };
 
-export type CarouselControls = {
-  cleanup: () => void;
-  nextSlide: () => void;
-  prevSlide: () => void;
-};
+export function useCarousel({ itemCount, intervalMs, enabled = true }: UseCarouselOptions) {
+  const [index, setIndex] = useState(0);
+  const pausedRef = useRef(false);
 
-export function setupCarousel({
-  track,
-  cardCount,
-  cardWidth,
-  slideMilliSec,
-}: CarouselOptions): CarouselControls | undefined {
-  if (!track) return;
+  useEffect(() => {
+    if (!enabled || itemCount <= 1) return;
+    const id = setInterval(() => {
+      if (pausedRef.current) return;
+      setIndex((i) => (i + 1) % itemCount);
+    }, intervalMs);
+    return () => clearInterval(id);
+  }, [itemCount, intervalMs, enabled]);
 
-  const originalCards = Array.from(track.children);
-  const visibleCards = cardCount;
-  let currentIndex = visibleCards;
-  let isTransitioning = false;
+  const next = () => setIndex((i) => (i + 1) % itemCount);
+  const prev = () => setIndex((i) => (i - 1 + itemCount) % itemCount);
 
-  originalCards.slice(-visibleCards).forEach((card) => {
-    track.insertBefore(card.cloneNode(true), track.firstChild);
-  });
-  originalCards.slice(0, visibleCards).forEach((card) => {
-    track.appendChild(card.cloneNode(true));
-  });
-
-  const totalCards = track.children.length;
-
-  track.style.transition = "none";
-  track.style.transform = `translateX(-${cardWidth * currentIndex}px)`;
-
-  function moveToIndex(newIndex: number) {
-    if (isTransitioning) return;
-    isTransitioning = true;
-
-    track.style.transition = "transform 0.5s ease";
-    track.style.transform = `translateX(-${cardWidth * newIndex}px)`;
-    currentIndex = newIndex;
-
-    const onTransitionEnd = () => {
-      isTransitioning = false;
-      if (currentIndex <= 0) {
-        track.style.transition = "none";
-        currentIndex = originalCards.length;
-        track.style.transform = `translateX(-${cardWidth * currentIndex}px)`;
-      } else if (currentIndex >= totalCards - visibleCards) {
-        track.style.transition = "none";
-        currentIndex = visibleCards;
-        track.style.transform = `translateX(-${cardWidth * currentIndex}px)`;
-      }
-    };
-    track.addEventListener("transitionend", onTransitionEnd, { once: true });
-  }
-
-  const intervalId = setInterval(() => moveToIndex(currentIndex + 1), slideMilliSec);
-
-  return {
-    cleanup: () => clearInterval(intervalId),
-    nextSlide: () => moveToIndex(currentIndex + 1),
-    prevSlide: () => moveToIndex(currentIndex - 1),
-  };
+  return { index, next, prev, pausedRef };
 }

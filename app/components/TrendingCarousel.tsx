@@ -1,14 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faChevronLeft,
   faChevronRight,
   faCaretRight,
 } from "@fortawesome/free-solid-svg-icons";
-import { setupCarousel, type CarouselControls } from "@/lib/carousel";
+import { useCarousel } from "@/lib/carousel";
 import { ratingFormatter, dateFormatter } from "@/lib/utils";
 import { TMDB_IMG } from "@/lib/tmdb";
 
@@ -26,9 +26,11 @@ type Props = {
 };
 
 export default function TrendingCarousel({ movies, taglines }: Props) {
-  const trackRef = useRef<HTMLDivElement | null>(null);
-  const [controls, setControls] = useState<CarouselControls | null>(null);
   const [screenWidth, setScreenWidth] = useState<number>(1280);
+  const { index, next, prev } = useCarousel({
+    itemCount: movies.length,
+    intervalMs: 10000,
+  });
 
   useEffect(() => {
     const onResize = () => setScreenWidth(window.innerWidth);
@@ -44,20 +46,6 @@ export default function TrendingCarousel({ movies, taglines }: Props) {
         ? screenWidth - 150
         : screenWidth - 50;
 
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track || movies.length === 0) return;
-
-    const c = setupCarousel({
-      track,
-      cardCount: 1,
-      cardWidth,
-      slideMilliSec: 10000,
-    });
-    if (c) setControls(c);
-    return () => c?.cleanup();
-  }, [movies, cardWidth]);
-
   return (
     <div
       className="mx-auto"
@@ -70,19 +58,25 @@ export default function TrendingCarousel({ movies, taglines }: Props) {
           {screenWidth > 1280 && (
             <button
               className="mr-10 text-color3 hover:text-color4"
-              onClick={() => controls?.prevSlide()}
+              onClick={prev}
               aria-label="previous"
             >
               <FontAwesomeIcon size="2x" icon={faChevronLeft} />
             </button>
           )}
 
-          <div className="relative my-8 rounded w-full overflow-hidden">
-            <div ref={trackRef} className="flex">
+          <div
+            className="relative my-8 rounded overflow-hidden shrink-0"
+            style={{ width: `${cardWidth}px` }}
+          >
+            <div
+              className="flex transition-transform duration-500 ease-in-out"
+              style={{ transform: `translateX(-${index * cardWidth}px)` }}
+            >
               {movies.map((movie) => (
                 <div
                   key={movie.id}
-                  className="h-auto md:h-140 w-full shrink-0 relative"
+                  className="h-auto md:h-140 shrink-0 relative"
                   style={{ width: `${cardWidth}px` }}
                 >
                   <div
@@ -133,7 +127,7 @@ export default function TrendingCarousel({ movies, taglines }: Props) {
           {screenWidth > 1280 && (
             <button
               className="ml-2 md:ml-10 text-color3 hover:text-color4"
-              onClick={() => controls?.nextSlide()}
+              onClick={next}
               aria-label="next"
             >
               <FontAwesomeIcon size="2x" icon={faChevronRight} />
