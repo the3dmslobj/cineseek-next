@@ -32,11 +32,8 @@ export default function TrendingHero({ items }: { items: HeroItem[] }) {
 
   return (
     <section
-      className="noise border-b flex flex-col"
-      style={{
-        borderColor: "var(--line)",
-        minHeight: "calc(100dvh - 3.5rem)",
-      }}
+      className="noise border-b flex flex-col flex-1"
+      style={{ borderColor: "var(--line)" }}
     >
       <div
         className="max-w-400 mx-auto w-full px-5 md:px-8 grid md:grid-cols-12 gap-6 py-10 md:py-16 flex-1"

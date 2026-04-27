@@ -77,7 +77,10 @@ export default async function Trending() {
   });
 
   return (
-    <>
+    <div
+      className="flex flex-col"
+      style={{ minHeight: "calc(100dvh - 3.5rem)" }}
+    >
       <TrendingHero items={heroItems} />
       <section
         className="border-b py-3 overflow-hidden"
@@ -103,6 +106,6 @@ export default async function Trending() {
           ))}
         </div>
       </section>
-    </>
+    </div>
   );
 }
