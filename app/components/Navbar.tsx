@@ -7,12 +7,15 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faMagnifyingGlass,
   faFaceMehBlank,
-  faUser,
+  faSun,
+  faMoon,
 } from "@fortawesome/free-solid-svg-icons";
 import { dateFormatter } from "@/lib/utils";
 import { TMDB_IMG } from "@/lib/tmdb";
 import { useAuth } from "./AuthProvider";
+import { useTheme } from "./ThemeProvider";
 import AuthModal from "./AuthModal";
+import Avatar from "./Avatar";
 
 type SearchResult = {
   id: number;
@@ -23,22 +26,23 @@ type SearchResult = {
   poster_path?: string | null;
 };
 
+function emailToName(email: string | undefined) {
+  if (!email) return "user";
+  return email.split("@")[0];
+}
+
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
-
   const { user } = useAuth();
+  const { theme, toggle: toggleTheme } = useTheme();
+
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [movieOrTv, setMovieOrTv] = useState<"movie" | "tv">("movie");
   const [query, setQuery] = useState("");
   const [resultArray, setResultArray] = useState<SearchResult[]>([]);
   const blurTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const onProfileClick = () => {
-    if (user) router.push("/profile");
-    else setAuthOpen((v) => !v);
-  };
 
   useEffect(() => {
     if (!query) return;
@@ -73,145 +77,192 @@ export default function Navbar() {
     }
   };
 
+  const username = emailToName(user?.email);
+
   return (
-    <>
-      <Link
-        href="/"
-        className="ml-5 text-3xl font-bold my-5 font-raleway text-color2 md:hidden block"
-      >
-        Cineseek
-      </Link>
-      <div className="flex justify-between md:my-8 md:mx-20 mx-5">
-        <Link href="/" className="hidden xl:block">
-          <img
-            className="h-12 cursor-pointer"
-            src="/cineseek-logo-black.svg"
-            alt="main-logo"
-          />
+    <header
+      className="border-b sticky top-0 z-40"
+      style={{ borderColor: "var(--line)", background: "var(--bg)" }}
+    >
+      <div className="max-w-[1600px] mx-auto px-5 md:px-8 h-14 flex items-center gap-5">
+        <Link href="/" className="flex items-center gap-2 shrink-0">
+          <span
+            className="inline-flex items-center justify-center w-7 h-7 font-bold text-[13px]"
+            style={{
+              background: "var(--ink)",
+              color: "var(--bg)",
+              border: "1px solid var(--ink)",
+            }}
+          >
+            C
+          </span>
+          <span className="font-grotesk font-bold tracking-tight text-lg">
+            cineseek
+          </span>
         </Link>
 
-        <div className="w-full lg:w-full xl:w-170 h-12 flex items-center relative justify-between">
-          <Link
-            href="/"
-            className="text-4xl font-bold text-color1 cursor-pointer font-dmSans hidden md:block xl:mr-auto"
-          >
-            CineSeek
-          </Link>
-
-          <div className="flex ml-0 items-center h-12 relative w-full justify-end">
-            <input
-              className="w-full md:w-67.5 h-12 px-3 rounded-xl text-[18px] text-color4 border-2 border-color1 bg-color1 placeholder-color4 focus:outline-none focus:border-[3px] focus:border-color2"
-              type="text"
-              placeholder="Search with name"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onFocus={() => {
-                if (blurTimeout.current) clearTimeout(blurTimeout.current);
-                setIsDropdownVisible(true);
-              }}
-              onBlur={() => {
-                blurTimeout.current = setTimeout(
-                  () => setIsDropdownVisible(false),
-                  150,
-                );
-              }}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") goToResults();
-              }}
-            />
-
-            <div
-              className="flex h-12 bg-color3 rounded-xl relative ml-3 md:mx-2 cursor-pointer"
-              onClick={() =>
-                setMovieOrTv(movieOrTv === "movie" ? "tv" : "movie")
-              }
-            >
-              <div
-                className={
-                  movieOrTv === "movie"
-                    ? "h-10 w-10 absolute top-1 right-1 bg-color1 rounded-lg"
-                    : "h-10 w-10 absolute top-1 left-1 bg-color1 rounded-lg"
-                }
-              />
-              <div className="h-12 w-12 flex items-center justify-center rounded-[10px] font-bold text-color1">
-                M
-              </div>
-              <div className="h-12 w-12 flex items-center justify-center rounded-[10px] font-bold text-color1">
-                S
-              </div>
-            </div>
-
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            goToResults();
+          }}
+          className="hidden md:flex items-center ml-auto flex-1 max-w-md border relative"
+          style={{ borderColor: "var(--line)" }}
+        >
+          <span className="px-3 cap">&gt;</span>
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onFocus={() => {
+              if (blurTimeout.current) clearTimeout(blurTimeout.current);
+              setIsDropdownVisible(true);
+            }}
+            onBlur={() => {
+              blurTimeout.current = setTimeout(
+                () => setIsDropdownVisible(false),
+                150,
+              );
+            }}
+            placeholder="search films, series, people…"
+            className="bg-transparent outline-none flex-1 text-[12px] py-2 font-mono"
+            style={{ color: "var(--ink)" }}
+          />
+          <div className="flex border-l" style={{ borderColor: "var(--line)" }}>
             <button
-              className="h-12 w-12 rounded-xl text-center text-color4 border-3 border-color2 cursor-pointer bg-color1 hover:border-color2 hover:text-color1 hover:bg-color3 transition duration-500 hidden md:block"
-              onClick={goToResults}
-              aria-label="search"
+              type="button"
+              onClick={() => setMovieOrTv("movie")}
+              className="w-8 h-9 text-[10px] font-mono"
+              style={{
+                background: movieOrTv === "movie" ? "var(--ink)" : "transparent",
+                color: movieOrTv === "movie" ? "var(--bg)" : "var(--ink-2)",
+              }}
             >
-              <FontAwesomeIcon icon={faMagnifyingGlass} />
+              M
             </button>
+            <button
+              type="button"
+              onClick={() => setMovieOrTv("tv")}
+              className="w-8 h-9 text-[10px] font-mono"
+              style={{
+                background: movieOrTv === "tv" ? "var(--ink)" : "transparent",
+                color: movieOrTv === "tv" ? "var(--bg)" : "var(--ink-2)",
+              }}
+            >
+              S
+            </button>
+          </div>
+          <button
+            className="px-3 h-9 cap border-l"
+            style={{ borderColor: "var(--line)", color: "var(--ink)" }}
+            aria-label="search"
+          >
+            ↵
+          </button>
 
-            <div className="relative ml-2">
-              <button
-                className="h-12 w-12 rounded-xl text-center text-color4 border-3 border-color2 cursor-pointer bg-color1 hover:border-color2 hover:text-color1 hover:bg-color3 transition duration-500"
-                onClick={onProfileClick}
-                aria-label={user ? "profile" : "sign in"}
-              >
-                <FontAwesomeIcon icon={faUser} />
-              </button>
-              {!user && authOpen && (
-                <AuthModal onClose={() => setAuthOpen(false)} />
+          {isDropdownVisible && query !== "" && (
+            <div
+              className="absolute top-12 left-0 right-0 z-10"
+              style={{
+                background: "var(--bg)",
+                border: "1px solid var(--line)",
+              }}
+              onMouseDown={() => {
+                if (blurTimeout.current) clearTimeout(blurTimeout.current);
+              }}
+            >
+              {resultArray.length > 0 ? (
+                resultArray.map((r) => (
+                  <Link
+                    key={r.id}
+                    href={`/details/${movieOrTv}/${r.id}`}
+                    className="flex items-center gap-3 p-2 transition"
+                    style={{ borderBottom: "1px solid var(--line)" }}
+                  >
+                    <img
+                      className="w-10 frame"
+                      src={
+                        r.poster_path
+                          ? `${TMDB_IMG}${r.poster_path}`
+                          : "https://dummyimage.com/100x140/111/111.png"
+                      }
+                      alt=""
+                    />
+                    <div
+                      className="flex-1 text-[12px] truncate"
+                      style={{ color: "var(--ink)" }}
+                    >
+                      {r.title || r.name}
+                    </div>
+                    <div className="cap shrink-0">
+                      {dateFormatter(r.release_date || r.first_air_date, {
+                        year: "numeric",
+                      })}
+                    </div>
+                  </Link>
+                ))
+              ) : (
+                <div className="flex flex-col items-center p-4">
+                  <FontAwesomeIcon
+                    className="text-color2 mb-2"
+                    icon={faFaceMehBlank}
+                  />
+                  <div className="cap">// no matches</div>
+                </div>
               )}
             </div>
+          )}
+        </form>
 
-            {isDropdownVisible && query !== "" && (
-              <div
-                className="absolute top-14 md:right-14 w-full md:w-93.75 bg-color1 z-10 rounded-lg"
-                onMouseDown={() => {
-                  if (blurTimeout.current) clearTimeout(blurTimeout.current);
-                }}
+        <div className="flex items-center gap-2 ml-auto md:ml-0">
+          <button
+            onClick={() => setIsDropdownVisible((v) => !v)}
+            className="md:hidden btn-icon"
+            aria-label="search"
+          >
+            <FontAwesomeIcon icon={faMagnifyingGlass} className="text-xs" />
+          </button>
+
+          <button
+            onClick={toggleTheme}
+            className="btn-icon"
+            aria-label="toggle theme"
+          >
+            <FontAwesomeIcon icon={theme === "dark" ? faSun : faMoon} />
+          </button>
+
+          {user ? (
+            <Link
+              href="/profile"
+              className="flex items-center gap-2 px-2 h-10 frame"
+            >
+              <Avatar name={username} size={20} />
+              <span
+                className="hidden sm:inline cap"
+                style={{ color: "var(--ink)" }}
               >
-                {resultArray.length > 0 ? (
-                  resultArray.map((result) => (
-                    <Link
-                      key={result.id}
-                      href={`/details/${movieOrTv}/${result.id}`}
-                      className="flex items-center w-full gap-5 p-2 cursor-pointer rounded hover:bg-color5 transition"
-                    >
-                      <img
-                        className="max-w-16 rounded"
-                        src={
-                          result.poster_path
-                            ? `${TMDB_IMG}${result.poster_path}`
-                            : "https://dummyimage.com/100x140/ffffff/ffffff.png"
-                        }
-                        alt=""
-                      />
-                      <div className="text-4 font-bold text-color4">
-                        {result.title || result.name}
-                      </div>
-                      <div className="ml-auto flex-column items-center justify-center shrink-0 font-bold text-color4">
-                        {dateFormatter(
-                          result.release_date || result.first_air_date,
-                          { year: "numeric" },
-                        )}
-                      </div>
-                    </Link>
-                  ))
-                ) : (
-                  <div className="flex flex-col w-full items-center p-3">
-                    <FontAwesomeIcon
-                      className="h-8 mb-3 text-color2"
-                      icon={faFaceMehBlank}
-                    />
-                    <div className="font-bold text-lg text-color2">
-                      Sorry, we can&apos;t find it.
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+                {username}
+              </span>
+            </Link>
+          ) : (
+            <>
+              <button
+                onClick={() => setAuthOpen(true)}
+                className="btn hidden sm:inline-flex"
+              >
+                Sign in
+              </button>
+              <button
+                onClick={() => setAuthOpen(true)}
+                className="btn btn-primary"
+              >
+                Join →
+              </button>
+            </>
+          )}
         </div>
       </div>
-    </>
+
+      {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
+    </header>
   );
 }
