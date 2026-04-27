@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faStar } from "@fortawesome/free-solid-svg-icons";
 import Navbar from "@/app/components/Navbar";
+import LibraryButtons from "@/app/components/LibraryButtons";
 import { tmdb, TMDB_IMG, FALLBACK_POSTER, FALLBACK_PROFILE } from "@/lib/tmdb";
 import { dateFormatter } from "@/lib/utils";
 
@@ -57,6 +58,10 @@ export default async function DetailsPage({
 
       <div className="text-3xl md:text-4xl lg:text-5xl font-raleway font-bold mb-5 lg:mb-10 ml-10 md:ml-20 mt-10 xl:mt-0 h-fit min-h-12 text-color3 xl:w-265">
         {details.title || details.name}
+      </div>
+
+      <div className="mx-auto w-full xl:w-265 px-10 md:px-20 xl:px-0 mb-5">
+        <LibraryButtons movieId={Number(id)} mediaType={type as "movie" | "tv"} />
       </div>
 
       <div className="mx-auto flex lg:flex-row flex-col w-full xl:w-265 flex-1 overflow-hidden lg:px-20 xl:px-0">
