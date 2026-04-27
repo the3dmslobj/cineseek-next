@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { config } from "@fortawesome/fontawesome-svg-core";
 import "@fortawesome/fontawesome-svg-core/styles.css";
 import "./globals.css";
+import { AuthProvider } from "./components/AuthProvider";
 
 config.autoAddCss = false;
 
@@ -19,7 +20,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <div className="max-w-7xl mx-auto">{children}</div>
+        <AuthProvider>
+          <div className="max-w-7xl mx-auto">{children}</div>
+        </AuthProvider>
       </body>
     </html>
   );
