@@ -1,16 +1,8 @@
 import Link from "next/link";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faStar,
-  faAnglesLeft,
-  faAnglesRight,
-  faAngleLeft,
-  faAngleRight,
-} from "@fortawesome/free-solid-svg-icons";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
-import { tmdb, TMDB_IMG, FALLBACK_POSTER } from "@/lib/tmdb";
-import { dateFormatter, trimText } from "@/lib/utils";
+import PosterCard, { type PosterItem } from "@/app/components/PosterCard";
+import { tmdb } from "@/lib/tmdb";
 
 type Result = {
   id: number;
@@ -34,17 +26,27 @@ export default async function ResultsPage({
   searchParams: Promise<{ type?: string; query?: string; page?: string }>;
 }) {
   const sp = await searchParams;
-  const type = sp.type === "tv" ? "tv" : "movie";
+  const type: "movie" | "tv" = sp.type === "tv" ? "tv" : "movie";
   const query = sp.query ?? "";
   const page = Math.max(1, Number(sp.page ?? 1));
 
   let data: SearchResponse | null = null;
   if (query) {
     data = await tmdb<SearchResponse>(
-      `/search/${type}?query=${encodeURIComponent(query)}&include_adult=false&page=${page}`
+      `/search/${type}?query=${encodeURIComponent(query)}&include_adult=false&page=${page}`,
     );
   }
 
+  const items: PosterItem[] = (data?.results ?? []).map((r) => ({
+    id: r.id,
+    title: r.title || r.name || "Untitled",
+    poster_path: r.poster_path,
+    year: (r.release_date || r.first_air_date || "").slice(0, 4) || undefined,
+    rating: r.vote_average,
+    type,
+  }));
+
+  const totalPages = data?.total_pages ?? 0;
   const buildHref = (p: number) =>
     `/results?type=${type}&query=${encodeURIComponent(query)}&page=${p}`;
 
@@ -52,108 +54,94 @@ export default async function ResultsPage({
     <>
       <Navbar />
 
-      <div className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-5 md:mb-10 w-full xl:w-265 text-color2 mx-auto mt-10 px-5 md:px-20 xl:px-5 tracking-wide">
-        Results for &quot;{query}&quot;
-      </div>
-
-      <div className="w-full xl:w-265 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 mx-auto px-5 md:px-20 xl:px-5">
-        {data?.results.map((r) => (
-          <Link href={`/details/${type}/${r.id}`} key={r.id} className="relative cursor-pointer">
-            <img
-              src={r.poster_path ? `${TMDB_IMG}${r.poster_path}` : FALLBACK_POSTER}
-              alt=""
-              className="rounded-lg w-full h-full"
-            />
-            <div
-              className="absolute bottom-2 left-2 flex w-[calc(100%-1rem)] justify-between px-3 py-1 rounded items-center"
-              style={{ backgroundColor: "rgba(0, 0, 0, 0.7)" }}
-            >
-              <div className="flex-1 font-semibold text-color4">
-                {trimText(r.title || r.name, 35)}
-              </div>
-            </div>
-            <div
-              className="absolute top-2 left-2 py-1 px-2 rounded font-semibold text-color4"
-              style={{ backgroundColor: "rgba(0, 0, 0, 0.7)" }}
-            >
-              <FontAwesomeIcon className="mr-1" icon={faStar} />
-              {r.vote_average?.toFixed(1)}
-            </div>
-            {(r.release_date || r.first_air_date) && (
-              <div
-                className="absolute top-2 right-2 py-1 px-2 rounded font-semibold text-color4"
-                style={{ backgroundColor: "rgba(0, 0, 0, 0.7)" }}
-              >
-                {dateFormatter(r.release_date || r.first_air_date, { year: "numeric" })}
-              </div>
-            )}
-          </Link>
-        ))}
-      </div>
-
-      {data && data.total_pages > 1 && (
-        <div className="flex justify-center items-center pt-6 mt-6">
-          {page > 1 && (
-            <>
-              <PageLink href={buildHref(1)} aria="first">
-                <FontAwesomeIcon icon={faAnglesLeft} />
-              </PageLink>
-              <PageLink href={buildHref(page - 1)} aria="previous">
-                <FontAwesomeIcon icon={faAngleLeft} />
-              </PageLink>
-            </>
-          )}
-
-          {Array.from({ length: 3 }, (_, i) => page + i)
-            .filter((p) => p <= data!.total_pages)
-            .map((p) => (
-              <Link
-                key={p}
-                href={buildHref(p)}
-                className={`w-10 h-10 mx-1 rounded flex items-center justify-center text-lg font-bold ${
-                  p === page
-                    ? "bg-color1 text-color4"
-                    : "text-color2 hover:bg-color3 hover:text-color1"
-                }`}
-              >
-                {p}
-              </Link>
-            ))}
-
-          {page < data.total_pages && (
-            <>
-              <PageLink href={buildHref(page + 1)} aria="next">
-                <FontAwesomeIcon icon={faAngleRight} />
-              </PageLink>
-              <PageLink href={buildHref(data.total_pages)} aria="last">
-                <FontAwesomeIcon icon={faAnglesRight} />
-              </PageLink>
-            </>
-          )}
+      <section className="max-w-400 mx-auto px-5 md:px-8 py-12 md:py-16">
+        <div
+          className="border-b pb-6 mb-8"
+          style={{ borderColor: "var(--line)" }}
+        >
+          <div className="cap mb-3">// QUERY</div>
+          <div className="flex items-end justify-between gap-4 flex-wrap">
+            <h1 className="display text-[clamp(40px,6vw,84px)]">
+              {query
+                ? `"${query}"`
+                : type === "tv"
+                  ? "All series."
+                  : "All films."}
+            </h1>
+            <span className="cap">
+              [{String(items.length).padStart(3, "0")} RESULTS]
+            </span>
+          </div>
         </div>
-      )}
+
+        <div className="flex gap-2 mb-8">
+          <Link
+            href={`/results?type=movie&query=${encodeURIComponent(query)}`}
+            className={`tag ${type === "movie" ? "solid" : ""}`}
+          >
+            FILMS
+          </Link>
+          <Link
+            href={`/results?type=tv&query=${encodeURIComponent(query)}`}
+            className={`tag ${type === "tv" ? "solid" : ""}`}
+          >
+            SERIES
+          </Link>
+        </div>
+
+        {items.length === 0 ? (
+          <div
+            className="frame p-16 text-center"
+            style={{ background: "var(--panel)" }}
+          >
+            <div className="cap mb-3">
+              {query ? "// 0 RESULTS" : "// EMPTY_QUERY"}
+            </div>
+            <h3 className="display text-3xl mb-2">
+              {query ? "No matches." : "Type something to search."}
+            </h3>
+            <p className="text-sm" style={{ color: "var(--ink-2)" }}>
+              {query
+                ? "Try different terms."
+                : "Use the search bar above."}
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {items.map((m) => (
+              <PosterCard key={m.id} item={m} />
+            ))}
+          </div>
+        )}
+
+        {totalPages > 1 && (
+          <div
+            className="flex items-center justify-between mt-12 pt-6 border-t"
+            style={{ borderColor: "var(--line)" }}
+          >
+            {page > 1 ? (
+              <Link href={buildHref(page - 1)} className="btn">
+                ← Prev
+              </Link>
+            ) : (
+              <span />
+            )}
+            <span className="cap">
+              PAGE {String(page).padStart(3, "0")} /{" "}
+              {String(totalPages).padStart(3, "0")}
+            </span>
+            {page < totalPages ? (
+              <Link href={buildHref(page + 1)} className="btn">
+                Next →
+              </Link>
+            ) : (
+              <span />
+            )}
+          </div>
+        )}
+      </section>
 
       <Footer />
     </>
-  );
-}
-
-function PageLink({
-  href,
-  aria,
-  children,
-}: {
-  href: string;
-  aria: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <Link
-      href={href}
-      aria-label={aria}
-      className="w-10 h-10 mx-1 rounded flex items-center justify-center text-color2 hover:bg-color3 hover:text-color1"
-    >
-      {children}
-    </Link>
   );
 }
