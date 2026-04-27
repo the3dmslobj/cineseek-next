@@ -6,7 +6,7 @@ import LibraryButtons from "@/app/components/LibraryButtons";
 import SectionLabel from "@/app/components/SectionLabel";
 import HRow from "@/app/components/HRow";
 import Avatar from "@/app/components/Avatar";
-import { tmdb, TMDB_IMG, FALLBACK_POSTER, FALLBACK_PROFILE } from "@/lib/tmdb";
+import { tmdb, TMDB_IMG, FALLBACK_POSTER } from "@/lib/tmdb";
 import type { PosterItem } from "@/app/components/PosterCard";
 
 type Detail = {
