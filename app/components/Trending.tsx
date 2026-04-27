@@ -16,7 +16,9 @@ export default async function Trending() {
   const movies = list.results.slice(0, 10);
 
   const details = await Promise.all(
-    movies.map((m) => tmdb<MovieDetail>(`/movie/${m.id}`).catch(() => ({ id: m.id })))
+    movies.map((m): Promise<MovieDetail> =>
+      tmdb<MovieDetail>(`/movie/${m.id}`).catch(() => ({ id: m.id }))
+    )
   );
   const taglines: Record<number, string> = {};
   details.forEach((d) => {

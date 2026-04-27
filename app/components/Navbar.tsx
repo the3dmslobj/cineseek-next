@@ -28,10 +28,7 @@ export default function Navbar() {
   const blurTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    if (!query) {
-      setResultArray([]);
-      return;
-    }
+    if (!query) return;
     const token = process.env.NEXT_PUBLIC_TMDB_API_KEY;
     const controller = new AbortController();
     fetch(
