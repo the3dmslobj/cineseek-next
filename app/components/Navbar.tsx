@@ -38,6 +38,7 @@ export default function Navbar() {
   const { theme, toggle: toggleTheme } = useTheme();
 
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [movieOrTv, setMovieOrTv] = useState<"movie" | "tv">("movie");
   const [query, setQuery] = useState("");
@@ -124,7 +125,7 @@ export default function Navbar() {
               );
             }}
             placeholder="search films, series, people…"
-            className="bg-transparent outline-none flex-1 text-[12px] py-2 font-mono"
+            className="bg-transparent outline-none flex-1 text-[12px] py-2 font-mono placeholder:text-ink-3"
             style={{ color: "var(--ink)" }}
           />
           <div className="flex border-l" style={{ borderColor: "var(--line)" }}>
@@ -215,7 +216,7 @@ export default function Navbar() {
 
         <div className="flex items-center gap-2 ml-auto md:ml-0">
           <button
-            onClick={() => setIsDropdownVisible((v) => !v)}
+            onClick={() => setMobileSearchOpen((v) => !v)}
             className="md:hidden btn-icon"
             aria-label="search"
           >
@@ -261,6 +262,30 @@ export default function Navbar() {
           )}
         </div>
       </div>
+
+      {mobileSearchOpen && (
+        <div
+          className="md:hidden border-t"
+          style={{ borderColor: "var(--line)" }}
+        >
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              goToResults();
+              setMobileSearchOpen(false);
+            }}
+            className="px-5 py-3 flex"
+          >
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="search…"
+              className="field"
+              autoFocus
+            />
+          </form>
+        </div>
+      )}
 
       {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
     </header>
