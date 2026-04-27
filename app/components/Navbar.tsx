@@ -7,9 +7,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faMagnifyingGlass,
   faFaceMehBlank,
+  faUser,
 } from "@fortawesome/free-solid-svg-icons";
 import { dateFormatter } from "@/lib/utils";
 import { TMDB_IMG } from "@/lib/tmdb";
+import { useAuth } from "./AuthProvider";
+import AuthModal from "./AuthModal";
 
 type SearchResult = {
   id: number;
@@ -24,11 +27,18 @@ export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
 
+  const { user } = useAuth();
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
   const [movieOrTv, setMovieOrTv] = useState<"movie" | "tv">("movie");
   const [query, setQuery] = useState("");
   const [resultArray, setResultArray] = useState<SearchResult[]>([]);
   const blurTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const onProfileClick = () => {
+    if (user) router.push("/profile");
+    else setAuthOpen((v) => !v);
+  };
 
   useEffect(() => {
     if (!query) return;
@@ -138,6 +148,19 @@ export default function Navbar() {
             >
               <FontAwesomeIcon icon={faMagnifyingGlass} />
             </button>
+
+            <div className="relative ml-2">
+              <button
+                className="h-12 w-12 rounded-xl text-center text-color4 border-3 border-color2 cursor-pointer bg-color1 hover:border-color2 hover:text-color1 hover:bg-color3 transition duration-500"
+                onClick={onProfileClick}
+                aria-label={user ? "profile" : "sign in"}
+              >
+                <FontAwesomeIcon icon={faUser} />
+              </button>
+              {!user && authOpen && (
+                <AuthModal onClose={() => setAuthOpen(false)} />
+              )}
+            </div>
 
             {isDropdownVisible && query !== "" && (
               <div
