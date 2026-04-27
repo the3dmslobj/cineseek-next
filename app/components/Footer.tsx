@@ -63,7 +63,14 @@ export default function Footer() {
       <div className="border-t" style={{ borderColor: "var(--line)" }}>
         <div className="max-w-400 mx-auto px-5 md:px-8 py-3 flex justify-between items-center">
           <span className="cap">© 2026 CINESEEK</span>
-          <span className="cap">// the3dmslobj</span>
+          <a
+            href="https://github.com/the3dmslobj"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="cap ulink"
+          >
+            // the3dmslobj
+          </a>
         </div>
       </div>
     </footer>
