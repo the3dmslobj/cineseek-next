@@ -2,7 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBookmark, faEye } from "@fortawesome/free-solid-svg-icons";
+import {
+  faBookmark,
+  faEye,
+  faEyeSlash,
+} from "@fortawesome/free-solid-svg-icons";
 import {
   addToLibrary,
   getEntry,
@@ -11,6 +15,7 @@ import {
   type MediaType,
 } from "@/lib/library";
 import { useAuth } from "./AuthProvider";
+import AuthModal from "./AuthModal";
 
 type Props = {
   movieId: number;
@@ -21,21 +26,32 @@ export default function LibraryButtons({ movieId, mediaType }: Props) {
   const { user, loading } = useAuth();
   const [status, setStatus] = useState<LibraryStatus | null>(null);
   const [busy, setBusy] = useState(false);
+  const [authOpen, setAuthOpen] = useState(false);
+  const [bounceSave, setBounceSave] = useState(false);
+  const [bounceWatch, setBounceWatch] = useState(false);
 
   useEffect(() => {
     if (!user) {
       setStatus(null);
       return;
     }
-    getEntry(movieId, mediaType).then((entry) => setStatus(entry?.status ?? null));
+    getEntry(movieId, mediaType).then((entry) =>
+      setStatus(entry?.status ?? null),
+    );
   }, [user, movieId, mediaType]);
 
   const toggle = async (target: LibraryStatus) => {
     if (!user) {
-      alert("Sign in to save movies.");
+      setAuthOpen(true);
       return;
     }
     setBusy(true);
+    if (target === "saved") setBounceSave(true);
+    else setBounceWatch(true);
+    setTimeout(() => {
+      setBounceSave(false);
+      setBounceWatch(false);
+    }, 350);
     try {
       if (status === target) {
         await removeFromLibrary(movieId, mediaType);
@@ -51,52 +67,30 @@ export default function LibraryButtons({ movieId, mediaType }: Props) {
 
   if (loading) return null;
 
-  return (
-    <div className="flex gap-2 my-3">
-      <Button
-        active={status === "saved"}
-        disabled={busy}
-        onClick={() => toggle("saved")}
-        icon={faBookmark}
-        label={status === "saved" ? "Saved" : "Save"}
-      />
-      <Button
-        active={status === "watched"}
-        disabled={busy}
-        onClick={() => toggle("watched")}
-        icon={faEye}
-        label={status === "watched" ? "Watched" : "Mark watched"}
-      />
-    </div>
-  );
-}
+  const isSaved = status === "saved";
+  const isWatched = status === "watched";
 
-function Button({
-  active,
-  disabled,
-  onClick,
-  icon,
-  label,
-}: {
-  active: boolean;
-  disabled: boolean;
-  onClick: () => void;
-  icon: typeof faBookmark;
-  label: string;
-}) {
   return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={
-        "h-8 px-3 rounded text-md font-bold flex items-center gap-2 transition disabled:opacity-50 " +
-        (active
-          ? "bg-color4 text-color1"
-          : "bg-color1 text-color4 hover:bg-color3")
-      }
-    >
-      <FontAwesomeIcon icon={icon} />
-      {label}
-    </button>
+    <>
+      <div className="flex flex-wrap gap-2 mb-8">
+        <button
+          onClick={() => toggle("saved")}
+          disabled={busy}
+          className={`btn ${isSaved ? "btn-primary" : ""} ${bounceSave ? "btn-bounce" : ""} disabled:opacity-50`}
+        >
+          <FontAwesomeIcon icon={faBookmark} />
+          {isSaved ? "Saved" : "Save"}
+        </button>
+        <button
+          onClick={() => toggle("watched")}
+          disabled={busy}
+          className={`btn ${isWatched ? "btn-primary" : ""} ${bounceWatch ? "btn-bounce" : ""} disabled:opacity-50`}
+        >
+          <FontAwesomeIcon icon={isWatched ? faEye : faEyeSlash} />
+          {isWatched ? "Watched" : "Mark watched"}
+        </button>
+      </div>
+      {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
+    </>
   );
 }
