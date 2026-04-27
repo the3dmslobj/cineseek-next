@@ -1,72 +1,162 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
+import Avatar from "@/app/components/Avatar";
 import LibraryGrid from "@/app/components/LibraryGrid";
 import { useAuth } from "@/app/components/AuthProvider";
+import { listLibrary } from "@/lib/library";
+
+type Tab = "saved" | "watched";
+
+function emailToName(email: string | undefined) {
+  if (!email) return "user";
+  return email.split("@")[0];
+}
 
 export default function ProfilePage() {
   const router = useRouter();
   const { user, loading, signOut } = useAuth();
+  const [tab, setTab] = useState<Tab>("saved");
+  const [savedCount, setSavedCount] = useState(0);
+  const [watchedCount, setWatchedCount] = useState(0);
 
   useEffect(() => {
     if (!loading && !user) router.replace("/");
   }, [loading, user, router]);
 
+  useEffect(() => {
+    if (!user) return;
+    listLibrary("saved").then((rows) => setSavedCount(rows.length));
+    listLibrary("watched").then((rows) => setWatchedCount(rows.length));
+  }, [user]);
+
   if (loading || !user) {
     return (
       <>
         <Navbar />
-        <div className="text-color3 text-center mt-20">Loading...</div>
+        <div className="cap text-center mt-20">// loading...</div>
       </>
     );
   }
+
+  const username = emailToName(user.email);
+  const since = user.created_at
+    ? new Date(user.created_at).toLocaleDateString("en-US", {
+        month: "short",
+        year: "numeric",
+      })
+    : "—";
 
   return (
     <>
       <Navbar />
 
-      <div className="mx-auto w-full xl:w-265 px-5 md:px-20 xl:px-5 mt-10">
-        <div className="flex items-center justify-between mb-10">
-          <div>
-            <div className="text-sm text-color2 font-bold">Signed in as</div>
-            <div className="text-2xl md:text-3xl font-bold text-color4 font-raleway">
-              {user.email}
-            </div>
+      <section className="max-w-400 mx-auto px-5 md:px-8 py-12 md:py-16">
+        <div
+          className="border-b pb-8 mb-10 grid md:grid-cols-12 gap-6 items-end"
+          style={{ borderColor: "var(--line)" }}
+        >
+          <div className="md:col-span-2">
+            <Avatar name={username} size={120} />
           </div>
-          <button
-            onClick={async () => {
-              await signOut();
-              router.push("/");
-            }}
-            className="h-10 px-4 rounded-xl bg-color1 text-color4 font-bold border-2 border-color2 hover:bg-color3 hover:text-color1 transition"
-            aria-label="sign out"
-          >
-            <FontAwesomeIcon icon={faRightFromBracket} className="mr-2" />
-            Sign out
-          </button>
+          <div className="md:col-span-7">
+            <div className="cap mb-2">
+              USER · MEMBER SINCE {since.toUpperCase()}
+            </div>
+            <h1 className="display text-[clamp(40px,7vw,108px)] break-words">
+              {username}
+            </h1>
+          </div>
+          <div className="md:col-span-3 flex flex-col gap-2">
+            <div
+              className="grid grid-cols-2 border"
+              style={{ borderColor: "var(--line)" }}
+            >
+              <div
+                className="p-3 border-r"
+                style={{ borderColor: "var(--line)" }}
+              >
+                <div className="cap mb-1">Saved</div>
+                <div className="display text-3xl text-accent">{savedCount}</div>
+              </div>
+              <div className="p-3">
+                <div className="cap mb-1">Watched</div>
+                <div className="display text-3xl text-accent">
+                  {watchedCount}
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={async () => {
+                await signOut();
+                router.push("/");
+              }}
+              className="btn"
+            >
+              <FontAwesomeIcon icon={faRightFromBracket} />
+              Sign out
+            </button>
+          </div>
         </div>
 
-        <div className="text-2xl md:text-3xl font-bold text-color3 mb-3">
-          Saved.
+        <div
+          className="flex gap-0 mb-8 border-b"
+          style={{ borderColor: "var(--line)" }}
+        >
+          {(
+            [
+              ["saved", "Saved", savedCount],
+              ["watched", "Watched", watchedCount],
+            ] as const
+          ).map(([key, label, n]) => (
+            <button
+              key={key}
+              onClick={() => setTab(key)}
+              className="px-5 py-3 cap"
+              style={{
+                color: tab === key ? "var(--ink)" : "var(--ink-3)",
+                borderBottom:
+                  tab === key
+                    ? "2px solid var(--accent)"
+                    : "2px solid transparent",
+                marginBottom: "-1px",
+              }}
+            >
+              {label} [{String(n).padStart(2, "0")}]
+            </button>
+          ))}
         </div>
-        <LibraryGrid
-          status="saved"
-          emptyText="Nothing saved yet — tap the bookmark on any movie."
-        />
 
-        <div className="text-2xl md:text-3xl font-bold text-color3 mb-3">
-          Watched.
+        {tab === "saved" ? (
+          <LibraryGrid
+            status="saved"
+            emptyText="Tap the bookmark on any film or series to keep it here for later."
+            emptyHeading="Nothing saved yet."
+          />
+        ) : (
+          <LibraryGrid
+            status="watched"
+            emptyText="Tap the eye icon on anything you've watched to log it."
+            emptyHeading="No screenings logged."
+          />
+        )}
+
+        <div
+          className="mt-10 pt-6 border-t flex justify-between items-center"
+          style={{ borderColor: "var(--line)" }}
+        >
+          <span className="cap">{user.email}</span>
+          <Link href="/" className="cap ulink">
+            ← Back home
+          </Link>
         </div>
-        <LibraryGrid
-          status="watched"
-          emptyText="Nothing watched yet — mark something as watched to see it here."
-        />
-      </div>
+      </section>
 
       <Footer />
     </>
