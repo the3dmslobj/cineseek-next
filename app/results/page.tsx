@@ -30,14 +30,12 @@ export default async function ResultsPage({
   const query = sp.query ?? "";
   const page = Math.max(1, Number(sp.page ?? 1));
 
-  let data: SearchResponse | null = null;
-  if (query) {
-    data = await tmdb<SearchResponse>(
-      `/search/${type}?query=${encodeURIComponent(query)}&include_adult=false&page=${page}`,
-    );
-  }
+  const endpoint = query
+    ? `/search/${type}?query=${encodeURIComponent(query)}&include_adult=false&page=${page}`
+    : `/${type}/popular?page=${page}`;
+  const data = await tmdb<SearchResponse>(endpoint);
 
-  const items: PosterItem[] = (data?.results ?? []).map((r) => ({
+  const items: PosterItem[] = (data.results ?? []).map((r) => ({
     id: r.id,
     title: r.title || r.name || "Untitled",
     poster_path: r.poster_path,
@@ -46,7 +44,7 @@ export default async function ResultsPage({
     type,
   }));
 
-  const totalPages = data?.total_pages ?? 0;
+  const totalPages = data.total_pages ?? 0;
   const buildHref = (p: number) =>
     `/results?type=${type}&query=${encodeURIComponent(query)}&page=${p}`;
 
@@ -94,16 +92,10 @@ export default async function ResultsPage({
             className="frame p-16 text-center"
             style={{ background: "var(--panel)" }}
           >
-            <div className="cap mb-3">
-              {query ? "// 0 RESULTS" : "// EMPTY_QUERY"}
-            </div>
-            <h3 className="display text-3xl mb-2">
-              {query ? "No matches." : "Type something to search."}
-            </h3>
+            <div className="cap mb-3">// 0 RESULTS</div>
+            <h3 className="display text-3xl mb-2">No matches.</h3>
             <p className="text-sm" style={{ color: "var(--ink-2)" }}>
-              {query
-                ? "Try different terms."
-                : "Use the search bar above."}
+              Try different terms.
             </p>
           </div>
         ) : (
