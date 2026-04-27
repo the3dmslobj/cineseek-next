@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
 import Navbar from "@/app/components/Navbar";
 import Footer from "@/app/components/Footer";
+import LibraryGrid from "@/app/components/LibraryGrid";
 import { useAuth } from "@/app/components/AuthProvider";
 
 export default function ProfilePage() {
@@ -53,12 +54,18 @@ export default function ProfilePage() {
         <div className="text-2xl md:text-3xl font-bold text-color3 mb-3">
           Saved.
         </div>
-        <div className="text-color2 mb-10">Nothing saved yet.</div>
+        <LibraryGrid
+          status="saved"
+          emptyText="Nothing saved yet — tap the bookmark on any movie."
+        />
 
         <div className="text-2xl md:text-3xl font-bold text-color3 mb-3">
           Watched.
         </div>
-        <div className="text-color2 mb-10">Nothing watched yet.</div>
+        <LibraryGrid
+          status="watched"
+          emptyText="Nothing watched yet — mark something as watched to see it here."
+        />
       </div>
 
       <Footer />
