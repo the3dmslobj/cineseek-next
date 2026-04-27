@@ -1,13 +1,27 @@
-import Link from "next/link";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCaretRight, faStar } from "@fortawesome/free-solid-svg-icons";
-import { tmdb, TMDB_IMG } from "@/lib/tmdb";
+import { tmdb } from "@/lib/tmdb";
+import PosterCard, { type PosterItem } from "./PosterCard";
+import SectionLabel from "./SectionLabel";
 
 type Item = {
   id: number;
+  title?: string;
+  name?: string;
   poster_path?: string;
+  release_date?: string;
+  first_air_date?: string;
   vote_average?: number;
 };
+
+function toPoster(it: Item, type: "movie" | "tv"): PosterItem {
+  return {
+    id: it.id,
+    title: it.title || it.name || "Untitled",
+    poster_path: it.poster_path,
+    year: (it.release_date || it.first_air_date || "").slice(0, 4) || undefined,
+    rating: it.vote_average,
+    type,
+  };
+}
 
 export default async function TopRated() {
   const [moviesRes, seriesRes] = await Promise.all([
@@ -15,66 +29,33 @@ export default async function TopRated() {
     tmdb<{ results: Item[] }>("/tv/top_rated?page=1"),
   ]);
 
-  const movies = moviesRes.results.slice(0, 18);
-  const series = seriesRes.results.slice(0, 18);
+  const movies = moviesRes.results.slice(0, 12).map((m) => toPoster(m, "movie"));
+  const series = seriesRes.results.slice(0, 12).map((s) => toPoster(s, "tv"));
 
   return (
-    <div className="w-full px-5 md:px-16 xl:px-10">
-      <div className="text-2xl md:text-5xl font-bold text-color4 mt-0 md:mt-10 font-raleway xl:ml-16 ml-0">
-        Don&apos;t Know What To Watch?
-      </div>
-
-      <div className="w-full flex flex-col">
-        <Section title="Top-Rated Movies" type="movie" items={movies} />
-        <Section title="Top-Rated Series" type="tv" items={series} />
-      </div>
-    </div>
-  );
-}
-
-function Section({
-  title,
-  type,
-  items,
-}: {
-  title: string;
-  type: "movie" | "tv";
-  items: Item[];
-}) {
-  return (
-    <div className="my-0 mx-auto">
-      <div className="flex items-center text-center mx-auto">
-        <div className="my-2 mb-5 md:my-8 md:mb-6 text-xl md:text-3xl font-bold text-color2 items-center">
-          {title}
+    <>
+      <section
+        className="max-w-400 mx-auto px-5 md:px-8 py-16 border-t"
+        style={{ borderColor: "var(--line)" }}
+      >
+        <SectionLabel idx={2} label="Top rated · films" count={movies.length} />
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          {movies.map((m) => (
+            <PosterCard key={m.id} item={m} />
+          ))}
         </div>
-        <FontAwesomeIcon
-          icon={faCaretRight}
-          size="2x"
-          className="ml-3 text-color2 pt-2 mb-5 md:mb-0"
-        />
-      </div>
-      <div className="w-full xl:w-265 grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5">
-        {items.map((it) => (
-          <Link
-            href={`/details/${type}/${it.id}`}
-            key={it.id}
-            className="relative cursor-pointer"
-          >
-            <img
-              src={`${TMDB_IMG}${it.poster_path}`}
-              alt=""
-              className="w-full shrink-0 rounded block h-auto"
-            />
-            <div
-              className="absolute bottom-2 right-2 text-xs md:text-sm font-bold p-1 text-color4 rounded"
-              style={{ backgroundColor: "rgba(0, 0, 0, 0.497)" }}
-            >
-              <FontAwesomeIcon icon={faStar} className="mr-1" />
-              {it.vote_average ? Number(it.vote_average.toFixed(1)) : ""}
-            </div>
-          </Link>
-        ))}
-      </div>
-    </div>
+      </section>
+      <section
+        className="max-w-400 mx-auto px-5 md:px-8 py-16 border-t"
+        style={{ borderColor: "var(--line)" }}
+      >
+        <SectionLabel idx={3} label="Top rated · series" count={series.length} />
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+          {series.map((s) => (
+            <PosterCard key={s.id} item={s} />
+          ))}
+        </div>
+      </section>
+    </>
   );
 }
