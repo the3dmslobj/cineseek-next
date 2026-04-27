@@ -216,13 +216,15 @@ export default function Navbar() {
         </form>
 
         <div className="flex items-center gap-2 ml-auto md:ml-0">
-          <button
-            onClick={() => setSearchModalOpen(true)}
-            className="md:hidden btn-icon"
-            aria-label="search"
-          >
-            <FontAwesomeIcon icon={faMagnifyingGlass} />
-          </button>
+          <div className="md:hidden">
+            <button
+              onClick={() => setSearchModalOpen(true)}
+              className="btn-icon"
+              aria-label="search"
+            >
+              <FontAwesomeIcon icon={faMagnifyingGlass} />
+            </button>
+          </div>
 
           <button
             onClick={toggleTheme}
@@ -248,10 +250,7 @@ export default function Navbar() {
           ) : (
             <>
               <div className="hidden md:contents">
-                <button
-                  onClick={() => setAuthOpen(true)}
-                  className="btn"
-                >
+                <button onClick={() => setAuthOpen(true)} className="btn">
                   Sign in
                 </button>
               </div>
@@ -268,10 +267,7 @@ export default function Navbar() {
 
       {searchModalOpen && (
         <>
-          <div
-            className="modal-bg"
-            onClick={() => setSearchModalOpen(false)}
-          />
+          <div className="modal-bg" onClick={() => setSearchModalOpen(false)} />
           <div className="modal" role="dialog">
             <div className="modal-hd">
               <span>SEARCH.MOD</span>
