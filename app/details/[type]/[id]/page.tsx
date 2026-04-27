@@ -98,7 +98,10 @@ export default async function DetailsPage({
       <section className="noise border-b" style={{ borderColor: "var(--line)" }}>
         <div className="max-w-400 mx-auto px-5 md:px-8 py-10 md:py-14 grid md:grid-cols-12 gap-8">
           <div className="md:col-span-4">
-            <div className="frame p-3" style={{ background: "var(--panel)" }}>
+            <div
+              className="frame p-3 w-full max-w-56 mx-auto md:max-w-none"
+              style={{ background: "var(--panel)" }}
+            >
               <div className="poster">
                 <img
                   src={
