@@ -14,6 +14,7 @@ export type HeroItem = {
   tagline?: string;
   runtime?: string;
   genres: string[];
+  director?: string;
 };
 
 export default function TrendingHero({ items }: { items: HeroItem[] }) {
@@ -94,22 +95,20 @@ export default function TrendingHero({ items }: { items: HeroItem[] }) {
             </div>
             <div className="mt-3 grid grid-cols-2 gap-2 text-[10px] font-mono">
               <div>
+                <div style={{ color: "var(--ink-3)" }}>DIR</div>
+                <div className="truncate">{item.director ?? "—"}</div>
+              </div>
+              <div>
                 <div style={{ color: "var(--ink-3)" }}>YR</div>
                 <div>{item.year}</div>
               </div>
               <div>
+                <div style={{ color: "var(--ink-3)" }}>RUN</div>
+                <div>{item.runtime ?? "—"}</div>
+              </div>
+              <div>
                 <div style={{ color: "var(--ink-3)" }}>RAT</div>
                 <div className="text-accent">★ {item.rating.toFixed(1)}</div>
-              </div>
-              {item.runtime && (
-                <div>
-                  <div style={{ color: "var(--ink-3)" }}>RUN</div>
-                  <div>{item.runtime}</div>
-                </div>
-              )}
-              <div>
-                <div style={{ color: "var(--ink-3)" }}>GEN</div>
-                <div className="truncate">{item.genres[0] ?? "—"}</div>
               </div>
             </div>
           </div>

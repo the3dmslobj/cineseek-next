@@ -17,6 +17,14 @@ type MovieDetail = {
   genres?: { id: number; name: string }[];
 };
 
+type Credits = {
+  crew: {
+    name: string;
+    known_for_department: string;
+    popularity: number;
+  }[];
+};
+
 const HERO_COUNT = 4;
 
 function fmtRuntime(minutes: number | undefined): string | undefined {
@@ -31,14 +39,29 @@ export default async function Trending() {
   const movies = list.results.slice(0, 10);
 
   const heroMovies = movies.slice(0, HERO_COUNT);
-  const detailFetches = await Promise.all(
-    heroMovies.map((m) =>
-      tmdb<MovieDetail>(`/movie/${m.id}`).catch(() => ({ id: m.id }) as MovieDetail),
+  const [detailFetches, creditsFetches] = await Promise.all([
+    Promise.all(
+      heroMovies.map((m) =>
+        tmdb<MovieDetail>(`/movie/${m.id}`).catch(
+          () => ({ id: m.id }) as MovieDetail,
+        ),
+      ),
     ),
-  );
+    Promise.all(
+      heroMovies.map((m) =>
+        tmdb<Credits>(`/movie/${m.id}/credits`).catch(
+          () => ({ crew: [] }) as Credits,
+        ),
+      ),
+    ),
+  ]);
 
   const heroItems: HeroItem[] = heroMovies.map((m, i) => {
     const d = detailFetches[i];
+    const c = creditsFetches[i];
+    const director = c.crew
+      .filter((p) => p.known_for_department === "Directing")
+      .sort((a, b) => b.popularity - a.popularity)[0]?.name;
     return {
       id: m.id,
       title: m.title,
@@ -49,6 +72,7 @@ export default async function Trending() {
       tagline: d.tagline || undefined,
       runtime: fmtRuntime(d.runtime),
       genres: (d.genres ?? []).slice(0, 3).map((g) => g.name),
+      director,
     };
   });
 
