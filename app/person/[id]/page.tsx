@@ -53,10 +53,10 @@ export default async function PersonPage({
         {person.name}
       </div>
 
-      <div className="mx-auto flex lg:flex-row flex-col w-full xl:w-[1060px] flex-1 overflow-hidden lg:px-20 xl:px-0">
-        <div className="lg:w-[230px] w-full flex flex-col">
+      <div className="mx-auto flex lg:flex-row flex-col w-full xl:w-265 flex-1 overflow-hidden lg:px-20 xl:px-0">
+        <div className="lg:w-57.5 w-full flex flex-col">
           <img
-            className="md:w-[230px] w-[200px] rounded mx-auto lg:mx-0"
+            className="md:w-57.5 w-50 rounded mx-auto lg:mx-0"
             src={person.profile_path ? `${TMDB_IMG}${person.profile_path}` : FALLBACK_PROFILE}
             alt=""
           />
@@ -103,16 +103,16 @@ export default async function PersonPage({
               <Link
                 href={`/details/${c.media_type}/${c.id}`}
                 key={c.credit_id}
-                className="max-w-[160px] w-[160px] m-2 cursor-pointer"
+                className="max-w-40 w-40 m-2 cursor-pointer"
               >
-                <div className="w-full flex-shrink-0 relative overflow-hidden">
+                <div className="w-full shrink-0 relative overflow-hidden">
                   <img
-                    className="max-w-[160px] w-[160px] h-[240px] object-cover object-top rounded"
+                    className="max-w-40 w-40 h-60 object-cover object-top rounded"
                     src={c.poster_path ? `${TMDB_IMG}${c.poster_path}` : FALLBACK_PROFILE}
                     alt=""
                   />
                   <div
-                    className="w-[152px] font-bold text-color4 absolute bottom-1 right-1 p-1 rounded"
+                    className="w-38 font-bold text-color4 absolute bottom-1 right-1 p-1 rounded"
                     style={{ backgroundColor: "rgba(0, 0, 0, 0.7)" }}
                   >
                     {trimText(c.title || c.name, 33)}

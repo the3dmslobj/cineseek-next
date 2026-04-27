@@ -52,11 +52,11 @@ export default async function ResultsPage({
     <>
       <Navbar />
 
-      <div className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-5 md:mb-10 w-full xl:w-[1060px] text-color2 mx-auto mt-10 px-5 md:px-20 xl:px-5 tracking-wide">
+      <div className="text-3xl md:text-4xl lg:text-5xl font-semibold mb-5 md:mb-10 w-full xl:w-265 text-color2 mx-auto mt-10 px-5 md:px-20 xl:px-5 tracking-wide">
         Results for &quot;{query}&quot;
       </div>
 
-      <div className="w-full xl:w-[1060px] grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 mx-auto px-5 md:px-20 xl:px-5">
+      <div className="w-full xl:w-265 grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5 mx-auto px-5 md:px-20 xl:px-5">
         {data?.results.map((r) => (
           <Link href={`/details/${type}/${r.id}`} key={r.id} className="relative cursor-pointer">
             <img

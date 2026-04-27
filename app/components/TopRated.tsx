@@ -47,11 +47,19 @@ function Section({
         <div className="my-2 mb-5 md:my-8 md:mb-6 text-xl md:text-3xl font-bold text-color2 items-center">
           {title}
         </div>
-        <FontAwesomeIcon icon={faCaretRight} size="2x" className="ml-3 text-color2 pt-2 mb-5 md:mb-0" />
+        <FontAwesomeIcon
+          icon={faCaretRight}
+          size="2x"
+          className="ml-3 text-color2 pt-2 mb-5 md:mb-0"
+        />
       </div>
-      <div className="w-full xl:w-[1060px] grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5">
+      <div className="w-full xl:w-265 grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-5">
         {items.map((it) => (
-          <Link href={`/details/${type}/${it.id}`} key={it.id} className="relative cursor-pointer">
+          <Link
+            href={`/details/${type}/${it.id}`}
+            key={it.id}
+            className="relative cursor-pointer"
+          >
             <img
               src={`${TMDB_IMG}${it.poster_path}`}
               alt=""

@@ -3,7 +3,11 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronLeft, faChevronRight, faCaretRight } from "@fortawesome/free-solid-svg-icons";
+import {
+  faChevronLeft,
+  faChevronRight,
+  faCaretRight,
+} from "@fortawesome/free-solid-svg-icons";
 import { setupCarousel, type CarouselControls } from "@/lib/carousel";
 import { ratingFormatter, dateFormatter } from "@/lib/utils";
 import { TMDB_IMG } from "@/lib/tmdb";
@@ -34,7 +38,11 @@ export default function TrendingCarousel({ movies, taglines }: Props) {
   }, []);
 
   const cardWidth =
-    screenWidth > 1280 ? 1060 : screenWidth > 768 ? screenWidth - 150 : screenWidth - 50;
+    screenWidth > 1280
+      ? 1060
+      : screenWidth > 768
+        ? screenWidth - 150
+        : screenWidth - 50;
 
   useEffect(() => {
     const track = trackRef.current;
@@ -53,7 +61,9 @@ export default function TrendingCarousel({ movies, taglines }: Props) {
   return (
     <div
       className="mx-auto"
-      style={{ width: screenWidth > 1280 ? `${cardWidth + 120}px` : `${cardWidth}px` }}
+      style={{
+        width: screenWidth > 1280 ? `${cardWidth + 120}px` : `${cardWidth}px`,
+      }}
     >
       <div className="my-5 w-full">
         <div className="mx-auto flex items-center rounded w-full">
@@ -72,7 +82,7 @@ export default function TrendingCarousel({ movies, taglines }: Props) {
               {movies.map((movie) => (
                 <div
                   key={movie.id}
-                  className="h-auto md:h-[560px] w-full shrink-0 relative"
+                  className="h-auto md:h-140 w-full shrink-0 relative"
                   style={{ width: `${cardWidth}px` }}
                 >
                   <div
@@ -87,7 +97,7 @@ export default function TrendingCarousel({ movies, taglines }: Props) {
                   />
 
                   <div className="w-full h-full z-1 p-5 md:p-10 lg:p-20 text-color3 flex flex-col box-border">
-                    <div className="w-full md:w-[600px] lg:w-[750px] tracking-wide text-3xl md:text-6xl font-bold mt-5 text-color4 font-raleway">
+                    <div className="w-full md:w-150 lg:w-187.5 tracking-wide text-3xl md:text-6xl font-bold mt-5 text-color4 font-raleway">
                       {movie.title}
                     </div>
                     <div className="mt-auto text-lg md:text-3xl font-bold text-color4 tracking-wide">
@@ -110,7 +120,8 @@ export default function TrendingCarousel({ movies, taglines }: Props) {
                         href={`/details/movie/${movie.id}`}
                         className="p-3 rounded text-sm md:text-md lg:text-xl font-semibold bg-color5 text-color4 tracking-wide hover:bg-color3 hover:text-color1 hover:font-bold"
                       >
-                        Details <FontAwesomeIcon className="ml-1" icon={faCaretRight} />
+                        Details{" "}
+                        <FontAwesomeIcon className="ml-1" icon={faCaretRight} />
                       </Link>
                     </div>
                   </div>

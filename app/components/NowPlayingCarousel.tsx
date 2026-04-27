@@ -3,7 +3,10 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
+import {
+  faChevronLeft,
+  faChevronRight,
+} from "@fortawesome/free-solid-svg-icons";
 import { setupCarousel, type CarouselControls } from "@/lib/carousel";
 import { TMDB_IMG } from "@/lib/tmdb";
 
@@ -72,7 +75,7 @@ export default function NowPlayingCarousel({ movies }: { movies: Movie[] }) {
       >
         {screenWidth >= 1280 && (
           <button
-            className="mr-[30px] hover:text-color4 text-color3"
+            className="mr-7.5 hover:text-color4 text-color3"
             onClick={() => controls?.prevSlide()}
             aria-label="previous"
           >
@@ -80,13 +83,16 @@ export default function NowPlayingCarousel({ movies }: { movies: Movie[] }) {
           </button>
         )}
         <div ref={containerRef} className="my-7 rounded w-full overflow-hidden">
-          <div ref={trackRef} className="flex flex-nowrap will-change-transform">
+          <div
+            ref={trackRef}
+            className="flex flex-nowrap will-change-transform"
+          >
             {movies.map((movie) =>
               movie.poster_path ? (
                 <Link
                   key={movie.id}
                   href={`/details/movie/${movie.id}`}
-                  className="mx-[10px] shrink-0"
+                  className="mx-2.5 shrink-0"
                   style={{ width: `${cardWidth}px` }}
                 >
                   <img
@@ -96,13 +102,13 @@ export default function NowPlayingCarousel({ movies }: { movies: Movie[] }) {
                     loading="lazy"
                   />
                 </Link>
-              ) : null
+              ) : null,
             )}
           </div>
         </div>
         {screenWidth >= 1280 && (
           <button
-            className="ml-[30px] text-color3 hover:text-color4"
+            className="ml-7.5 text-color3 hover:text-color4"
             onClick={() => controls?.nextSlide()}
             aria-label="next"
           >

@@ -67,7 +67,7 @@ export default function Navbar() {
           <img className="h-12 cursor-pointer" src="/cineseek-logo-black.svg" alt="main-logo" />
         </Link>
 
-        <div className="w-full lg:w-full xl:w-[680px] h-12 flex items-center relative justify-between">
+        <div className="w-full lg:w-full xl:w-170 h-12 flex items-center relative justify-between">
           <Link
             href="/"
             className="text-4xl font-bold text-color1 cursor-pointer font-dmSans hidden md:block xl:mr-auto"
@@ -77,7 +77,7 @@ export default function Navbar() {
 
           <div className="flex ml-0 items-center h-12 relative w-full justify-end">
             <input
-              className="w-full md:w-[270px] h-12 px-3 rounded-xl text-[18px] text-color4 border-2 border-color1 bg-color1 placeholder-color4 focus:outline-none focus:border-[3px] focus:border-color2"
+              className="w-full md:w-67.5 h-12 px-3 rounded-xl text-lg text-color4 border-2 border-color1 bg-color1 placeholder-color4 focus:outline-none focus:border-3 focus:border-color2"
               type="text"
               placeholder="Search with name"
               value={query}
@@ -119,7 +119,7 @@ export default function Navbar() {
 
             {isDropdownVisible && query !== "" && (
               <div
-                className="absolute top-14 md:right-14 w-full md:w-[375px] bg-color1 z-10 rounded-lg"
+                className="absolute top-14 md:right-14 w-full md:w-93.75 bg-color1 z-10 rounded-lg"
                 onMouseDown={() => {
                   if (blurTimeout.current) clearTimeout(blurTimeout.current);
                 }}
