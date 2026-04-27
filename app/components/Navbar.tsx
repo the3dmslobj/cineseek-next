@@ -4,7 +4,10 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faMagnifyingGlass, faFaceMehBlank } from "@fortawesome/free-solid-svg-icons";
+import {
+  faMagnifyingGlass,
+  faFaceMehBlank,
+} from "@fortawesome/free-solid-svg-icons";
 import { dateFormatter } from "@/lib/utils";
 import { TMDB_IMG } from "@/lib/tmdb";
 
@@ -33,12 +36,15 @@ export default function Navbar() {
     const controller = new AbortController();
     fetch(
       `https://api.themoviedb.org/3/search/${movieOrTv}?query=${encodeURIComponent(
-        query
+        query,
       )}&include_adult=false&language=en-US&page=1`,
       {
-        headers: { accept: "application/json", Authorization: `Bearer ${token}` },
+        headers: {
+          accept: "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         signal: controller.signal,
-      }
+      },
     )
       .then((r) => r.json())
       .then((data) => setResultArray(data.results?.slice(0, 4) ?? []))
@@ -59,12 +65,19 @@ export default function Navbar() {
 
   return (
     <>
-      <Link href="/" className="ml-5 text-3xl font-bold my-5 font-raleway text-color2 md:hidden block">
+      <Link
+        href="/"
+        className="ml-5 text-3xl font-bold my-5 font-raleway text-color2 md:hidden block"
+      >
         Cineseek
       </Link>
       <div className="flex justify-between md:my-8 md:mx-20 mx-5">
         <Link href="/" className="hidden xl:block">
-          <img className="h-12 cursor-pointer" src="/cineseek-logo-black.svg" alt="main-logo" />
+          <img
+            className="h-12 cursor-pointer"
+            src="/cineseek-logo-black.svg"
+            alt="main-logo"
+          />
         </Link>
 
         <div className="w-full lg:w-full xl:w-170 h-12 flex items-center relative justify-between">
@@ -77,7 +90,7 @@ export default function Navbar() {
 
           <div className="flex ml-0 items-center h-12 relative w-full justify-end">
             <input
-              className="w-full md:w-67.5 h-12 px-3 rounded-xl text-lg text-color4 border-2 border-color1 bg-color1 placeholder-color4 focus:outline-none focus:border-3 focus:border-color2"
+              className="w-full md:w-67.5 h-12 px-3 rounded-xl text-[18px] text-color4 border-2 border-color1 bg-color1 placeholder-color4 focus:outline-none focus:border-[3px] focus:border-color2"
               type="text"
               placeholder="Search with name"
               value={query}
@@ -87,7 +100,10 @@ export default function Navbar() {
                 setIsDropdownVisible(true);
               }}
               onBlur={() => {
-                blurTimeout.current = setTimeout(() => setIsDropdownVisible(false), 150);
+                blurTimeout.current = setTimeout(
+                  () => setIsDropdownVisible(false),
+                  150,
+                );
               }}
               onKeyDown={(e) => {
                 if (e.key === "Enter") goToResults();
@@ -96,7 +112,9 @@ export default function Navbar() {
 
             <div
               className="flex h-12 bg-color3 rounded-xl relative ml-3 md:mx-2 cursor-pointer"
-              onClick={() => setMovieOrTv(movieOrTv === "movie" ? "tv" : "movie")}
+              onClick={() =>
+                setMovieOrTv(movieOrTv === "movie" ? "tv" : "movie")
+              }
             >
               <div
                 className={
@@ -105,8 +123,12 @@ export default function Navbar() {
                     : "h-10 w-10 absolute top-1 left-1 bg-color1 rounded-lg"
                 }
               />
-              <div className="h-12 w-12 flex items-center justify-center rounded-[10px] font-bold text-color1">M</div>
-              <div className="h-12 w-12 flex items-center justify-center rounded-[10px] font-bold text-color1">S</div>
+              <div className="h-12 w-12 flex items-center justify-center rounded-[10px] font-bold text-color1">
+                M
+              </div>
+              <div className="h-12 w-12 flex items-center justify-center rounded-[10px] font-bold text-color1">
+                S
+              </div>
             </div>
 
             <button
@@ -140,16 +162,26 @@ export default function Navbar() {
                         }
                         alt=""
                       />
-                      <div className="text-4 font-bold text-color4">{result.title || result.name}</div>
+                      <div className="text-4 font-bold text-color4">
+                        {result.title || result.name}
+                      </div>
                       <div className="ml-auto flex-column items-center justify-center shrink-0 font-bold text-color4">
-                        {dateFormatter(result.release_date || result.first_air_date, { year: "numeric" })}
+                        {dateFormatter(
+                          result.release_date || result.first_air_date,
+                          { year: "numeric" },
+                        )}
                       </div>
                     </Link>
                   ))
                 ) : (
                   <div className="flex flex-col w-full items-center p-3">
-                    <FontAwesomeIcon className="h-8 mb-3 text-color2" icon={faFaceMehBlank} />
-                    <div className="font-bold text-lg text-color2">Sorry, we can&apos;t find it.</div>
+                    <FontAwesomeIcon
+                      className="h-8 mb-3 text-color2"
+                      icon={faFaceMehBlank}
+                    />
+                    <div className="font-bold text-lg text-color2">
+                      Sorry, we can&apos;t find it.
+                    </div>
                   </div>
                 )}
               </div>
