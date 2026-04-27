@@ -38,7 +38,7 @@ export default function Navbar() {
   const { theme, toggle: toggleTheme } = useTheme();
 
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
-  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [movieOrTv, setMovieOrTv] = useState<"movie" | "tv">("movie");
   const [query, setQuery] = useState("");
@@ -124,7 +124,7 @@ export default function Navbar() {
                 150,
               );
             }}
-            placeholder="search films, series, people…"
+            placeholder="search films and series…"
             className="bg-transparent outline-none flex-1 text-[12px] py-2 font-mono placeholder:text-ink-3"
             style={{ color: "var(--ink)" }}
           />
@@ -134,7 +134,8 @@ export default function Navbar() {
               onClick={() => setMovieOrTv("movie")}
               className="w-8 h-9 text-[10px] font-mono"
               style={{
-                background: movieOrTv === "movie" ? "var(--ink)" : "transparent",
+                background:
+                  movieOrTv === "movie" ? "var(--ink)" : "transparent",
                 color: movieOrTv === "movie" ? "var(--bg)" : "var(--ink-2)",
               }}
             >
@@ -216,11 +217,11 @@ export default function Navbar() {
 
         <div className="flex items-center gap-2 ml-auto md:ml-0">
           <button
-            onClick={() => setMobileSearchOpen((v) => !v)}
+            onClick={() => setSearchModalOpen(true)}
             className="md:hidden btn-icon"
             aria-label="search"
           >
-            <FontAwesomeIcon icon={faMagnifyingGlass} className="text-xs" />
+            <FontAwesomeIcon icon={faMagnifyingGlass} />
           </button>
 
           <button
@@ -246,12 +247,14 @@ export default function Navbar() {
             </Link>
           ) : (
             <>
-              <button
-                onClick={() => setAuthOpen(true)}
-                className="btn hidden sm:inline-flex"
-              >
-                Sign in
-              </button>
+              <div className="hidden md:contents">
+                <button
+                  onClick={() => setAuthOpen(true)}
+                  className="btn"
+                >
+                  Sign in
+                </button>
+              </div>
               <button
                 onClick={() => setAuthOpen(true)}
                 className="btn btn-primary"
@@ -263,28 +266,112 @@ export default function Navbar() {
         </div>
       </div>
 
-      {mobileSearchOpen && (
-        <div
-          className="md:hidden border-t"
-          style={{ borderColor: "var(--line)" }}
-        >
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              goToResults();
-              setMobileSearchOpen(false);
-            }}
-            className="px-5 py-3 flex"
-          >
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="search…"
-              className="field"
-              autoFocus
-            />
-          </form>
-        </div>
+      {searchModalOpen && (
+        <>
+          <div
+            className="modal-bg"
+            onClick={() => setSearchModalOpen(false)}
+          />
+          <div className="modal" role="dialog">
+            <div className="modal-hd">
+              <span>SEARCH.MOD</span>
+              <button
+                onClick={() => setSearchModalOpen(false)}
+                aria-label="close"
+                className="hover:text-accent"
+                style={{ color: "var(--ink-3)" }}
+              >
+                [X]
+              </button>
+            </div>
+            <div className="modal-bd">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!query) return;
+                  setSearchModalOpen(false);
+                  goToResults();
+                }}
+                className="space-y-4"
+              >
+                <div>
+                  <label className="cap block mb-2">Query</label>
+                  <input
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="title, name…"
+                    className="field"
+                    autoFocus
+                  />
+                </div>
+                <div className="flex gap-2 items-center">
+                  <span className="cap mr-2">Type</span>
+                  <button
+                    type="button"
+                    onClick={() => setMovieOrTv("movie")}
+                    className={`tag ${movieOrTv === "movie" ? "solid" : ""}`}
+                  >
+                    FILMS
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMovieOrTv("tv")}
+                    className={`tag ${movieOrTv === "tv" ? "solid" : ""}`}
+                  >
+                    SERIES
+                  </button>
+                </div>
+                <button
+                  type="submit"
+                  disabled={!query}
+                  className="btn btn-primary w-full justify-center disabled:opacity-50"
+                >
+                  Search →
+                </button>
+              </form>
+
+              {query && resultArray.length > 0 && (
+                <div
+                  className="mt-6 border-t pt-4"
+                  style={{ borderColor: "var(--line)" }}
+                >
+                  <div className="cap mb-3">// suggestions</div>
+                  <div className="space-y-2">
+                    {resultArray.map((r) => (
+                      <Link
+                        key={r.id}
+                        href={`/details/${movieOrTv}/${r.id}`}
+                        onClick={() => setSearchModalOpen(false)}
+                        className="flex items-center gap-3 p-2 frame"
+                      >
+                        <img
+                          className="w-10"
+                          src={
+                            r.poster_path
+                              ? `${TMDB_IMG}${r.poster_path}`
+                              : "https://dummyimage.com/100x140/111/111.png"
+                          }
+                          alt=""
+                        />
+                        <div
+                          className="flex-1 text-[12px] truncate"
+                          style={{ color: "var(--ink)" }}
+                        >
+                          {r.title || r.name}
+                        </div>
+                        <div className="cap shrink-0">
+                          {dateFormatter(r.release_date || r.first_air_date, {
+                            year: "numeric",
+                          })}
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </>
       )}
 
       {authOpen && <AuthModal onClose={() => setAuthOpen(false)} />}
