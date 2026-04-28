@@ -5,9 +5,12 @@ import Link from "next/link";
 import PosterCard, { type PosterItem } from "./PosterCard";
 import {
   listLibrary,
+  type LibraryEntry,
   type LibraryStatus,
   type MediaType,
 } from "@/lib/library";
+
+type WithEntry = { item: PosterItem; entry: LibraryEntry };
 
 async function fetchTitle(
   id: number,
@@ -41,17 +44,20 @@ export default function LibraryGrid({
   emptyText: string;
   emptyHeading: string;
 }) {
-  const [items, setItems] = useState<PosterItem[] | null>(null);
+  const [rows, setRows] = useState<WithEntry[] | null>(null);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       const entries = await listLibrary(status);
       const fetched = await Promise.all(
-        entries.map((e) => fetchTitle(e.movie_id, e.media_type)),
+        entries.map(async (e) => {
+          const item = await fetchTitle(e.movie_id, e.media_type);
+          return item ? { item, entry: e } : null;
+        }),
       );
       if (!cancelled) {
-        setItems(fetched.filter((c): c is PosterItem => c !== null));
+        setRows(fetched.filter((r): r is WithEntry => r !== null));
       }
     })();
     return () => {
@@ -59,9 +65,9 @@ export default function LibraryGrid({
     };
   }, [status]);
 
-  if (items === null) return <div className="cap">// loading...</div>;
+  if (rows === null) return <div className="cap">// loading...</div>;
 
-  if (items.length === 0) {
+  if (rows.length === 0) {
     return (
       <div
         className="frame p-12 md:p-20 text-center"
@@ -82,10 +88,33 @@ export default function LibraryGrid({
     );
   }
 
+  const showNotes = status === "watched";
+
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-      {items.map((m) => (
-        <PosterCard key={`${m.type}-${m.id}`} item={m} />
+      {rows.map(({ item, entry }) => (
+        <div key={`${item.type}-${item.id}`} className="flex flex-col gap-2">
+          <PosterCard item={item} />
+          {showNotes && entry.note && (
+            <Link
+              href={`/details/${item.type}/${item.id}`}
+              className="frame p-2 text-[11px] leading-relaxed line-clamp-3"
+              style={{
+                background: "var(--panel)",
+                color: "var(--ink-2)",
+              }}
+              title={entry.note}
+            >
+              <span
+                className="cap block mb-1"
+                style={{ color: "var(--ink-3)" }}
+              >
+                // note
+              </span>
+              {entry.note}
+            </Link>
+          )}
+        </div>
       ))}
     </div>
   );
