@@ -8,6 +8,7 @@ export type LibraryEntry = {
   media_type: MediaType;
   status: LibraryStatus;
   added_at: string;
+  note: string | null;
 };
 
 export async function addToLibrary(
@@ -49,7 +50,7 @@ export async function listLibrary(status?: LibraryStatus): Promise<LibraryEntry[
 
   let query = supabase
     .from("library")
-    .select("movie_id, media_type, status, added_at")
+    .select("movie_id, media_type, status, added_at, note")
     .eq("user_id", userId)
     .order("added_at", { ascending: false });
   if (status) query = query.eq("status", status);
@@ -57,6 +58,25 @@ export async function listLibrary(status?: LibraryStatus): Promise<LibraryEntry[
   const { data, error } = await query;
   if (error) throw error;
   return (data ?? []) as LibraryEntry[];
+}
+
+export async function setNote(
+  movieId: number,
+  mediaType: MediaType,
+  note: string,
+) {
+  const { data: userData } = await supabase.auth.getUser();
+  const userId = userData.user?.id;
+  if (!userId) throw new Error("Not signed in");
+
+  const trimmed = note.trim();
+  const { error } = await supabase
+    .from("library")
+    .update({ note: trimmed || null })
+    .eq("user_id", userId)
+    .eq("movie_id", movieId)
+    .eq("media_type", mediaType);
+  if (error) throw error;
 }
 
 export async function getEntry(
@@ -69,7 +89,7 @@ export async function getEntry(
 
   const { data, error } = await supabase
     .from("library")
-    .select("movie_id, media_type, status, added_at")
+    .select("movie_id, media_type, status, added_at, note")
     .eq("user_id", userId)
     .eq("movie_id", movieId)
     .eq("media_type", mediaType)
