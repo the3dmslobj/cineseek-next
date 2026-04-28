@@ -79,7 +79,7 @@ export default function LibraryButtons({ movieId, mediaType }: Props) {
           className={`btn ${isSaved ? "btn-primary" : ""} ${bounceSave ? "btn-bounce" : ""} disabled:opacity-50`}
         >
           <FontAwesomeIcon icon={faBookmark} />
-          {isSaved ? "Saved" : "Save"}
+          {isSaved ? "In watchlist" : "Watchlist"}
         </button>
         <button
           onClick={() => toggle("watched")}

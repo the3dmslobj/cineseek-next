@@ -82,7 +82,7 @@ export default function ProfilePage() {
                 className="p-3 border-r"
                 style={{ borderColor: "var(--line)" }}
               >
-                <div className="cap mb-1">Saved</div>
+                <div className="cap mb-1">Watchlist</div>
                 <div className="display text-3xl text-accent">{savedCount}</div>
               </div>
               <div className="p-3">
@@ -111,7 +111,7 @@ export default function ProfilePage() {
         >
           {(
             [
-              ["saved", "Saved", savedCount],
+              ["saved", "Watchlist", savedCount],
               ["watched", "Watched", watchedCount],
             ] as const
           ).map(([key, label, n]) => (
@@ -136,8 +136,8 @@ export default function ProfilePage() {
         {tab === "saved" ? (
           <LibraryGrid
             status="saved"
-            emptyText="Tap the bookmark on any film or series to keep it here for later."
-            emptyHeading="Nothing saved yet."
+            emptyText="Tap the bookmark on any film or series to add it to your watchlist."
+            emptyHeading="Watchlist is empty."
           />
         ) : (
           <LibraryGrid

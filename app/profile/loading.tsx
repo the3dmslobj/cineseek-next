@@ -27,7 +27,7 @@ export default function Loading() {
               className="p-3 border-r"
               style={{ borderColor: "var(--line)" }}
             >
-              <div className="cap mb-2">Saved</div>
+              <div className="cap mb-2">Watchlist</div>
               <div
                 className="frame h-8 w-12"
                 style={{ background: "var(--panel)" }}
@@ -53,7 +53,7 @@ export default function Loading() {
         style={{ borderColor: "var(--line)" }}
       >
         <div className="px-5 py-3">
-          <span className="cap">Saved [··]</span>
+          <span className="cap">Watchlist [··]</span>
         </div>
         <div className="px-5 py-3">
           <span className="cap">Watched [··]</span>
