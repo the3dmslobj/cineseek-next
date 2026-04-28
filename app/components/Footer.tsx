@@ -30,9 +30,9 @@ export default function Footer() {
               className="inline-flex items-center justify-center w-6 h-6 font-bold text-[11px]"
               style={{ background: "var(--ink)", color: "var(--bg)" }}
             >
-              C
+              M
             </span>
-            <span className="font-grotesk font-bold">cineseek</span>
+            <span className="font-grotesk font-bold">movimemo</span>
           </div>
           <p
             className="text-[12px] max-w-xs"
@@ -62,7 +62,7 @@ export default function Footer() {
       </div>
       <div className="border-t" style={{ borderColor: "var(--line)" }}>
         <div className="max-w-400 mx-auto px-5 md:px-8 py-3 flex justify-between items-center">
-          <span className="cap">© 2026 CINESEEK</span>
+          <span className="cap">© 2026 MOVIMEMO</span>
           <a
             href="https://github.com/the3dmslobj"
             target="_blank"

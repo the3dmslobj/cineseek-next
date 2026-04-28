@@ -8,7 +8,7 @@ import { ThemeProvider } from "./components/ThemeProvider";
 config.autoAddCss = false;
 
 export const metadata: Metadata = {
-  title: "Cineseek",
+  title: "movimemo",
   description: "Browse trending movies and TV shows powered by TMDB.",
 };
 

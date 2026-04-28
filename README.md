@@ -1,6 +1,6 @@
-# Cineseek
+# movimemo
 
-A school-project movie database. Browse trending films, now-playing, top-rated movies and series; sign up to save and mark titles as watched. Originally a [Vite + React prototype](https://github.com/the3dmslobj/cineseek), rewritten in Next.js with a brutalist terminal redesign.
+A school-project movie database. Browse trending films, now-playing, top-rated movies and series; sign up to your watchlist, mark titles as watched, and jot a private note on each. Originally a [Vite + React prototype called Cineseek](https://github.com/the3dmslobj/cineseek), rewritten in Next.js with a brutalist terminal redesign.
 
 > Live data from [TMDB](https://developer.themoviedb.org/), auth + library via [Supabase](https://supabase.com), deployed-friendly on Vercel.
 

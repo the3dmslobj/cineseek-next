@@ -95,10 +95,10 @@ export default function Navbar() {
               border: "1px solid var(--ink)",
             }}
           >
-            C
+            M
           </span>
           <span className="font-grotesk font-bold tracking-tight text-lg">
-            cineseek
+            movimemo
           </span>
         </Link>
 
