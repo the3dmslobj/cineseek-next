@@ -22,11 +22,12 @@ A school-project movie database. Browse trending films, now-playing, top-rated m
 - **Editorial hero** that auto-cycles through 5 trending movies every 7 s, with title, tagline, genre / year / runtime / rating chips, and a framed poster card showing director · year · runtime · rating.
 - **Marquee strip** of trending titles below the hero.
 - **Now Playing** horizontal scroller and **Top-Rated** grids for both films and series.
-- **Details page** with poster (corner labels: id / year / FLM·SER / rating), italic tagline, chips, save / mark-watched buttons, director-linked metadata grid, cast scroller (real photos, initials fallback), and a recommendations row.
+- **Watch Next** discovery page with mood chips (Cozy, Tense, Uplifting, Mind-bending, Melancholy, Adventurous, Dark) plus genre / year / minimum rating / runtime preset / sort filters. URL-driven so every combination is shareable.
+- **Details page** with poster (corner labels: id / year / FLM·SER / rating), italic tagline, chips, watchlist / mark-watched buttons, an inline note editor that appears once a title is marked watched (1000-char counter, save indicator, private), director-linked metadata grid, cast scroller (real photos, initials fallback), and a recommendations row.
 - **Person page** with profile photo (or initials), bio, BORN / FROM / DIED / CREDITS metadata, and full filmography H-scroll.
 - **Search** with desktop inline bar (M/S toggle, live suggestions dropdown) and mobile `SEARCH.MOD` modal. Empty queries fall back to TMDB `/popular`.
-- **Auth** as a single floating `AUTH/SIGNIN.MOD` modal that toggles between log in and sign up. The Save / Watched buttons open the same modal when signed out.
-- **Profile page** with initials avatar, member-since label, saved + watched counts, tabs, empty states, and sign-out.
+- **Auth** as a single floating `AUTH/SIGNIN.MOD` modal that toggles between log in and sign up. The Watchlist / Watched buttons open the same modal when signed out.
+- **Profile page** with initials avatar, member-since label, watchlist + watched counts, tabs, note previews under each watched poster, empty states, and sign-out.
 - **Theme switcher** (sun / moon button in the navbar) — dark `#0a0a0a` / lime `#c6ff00` accent, light `#f4f4f1` / indigo `#3300ff` accent. Persisted to `localStorage`.
 
 ## Routes
@@ -34,10 +35,11 @@ A school-project movie database. Browse trending films, now-playing, top-rated m
 | Path | What |
 | --- | --- |
 | `/` | Hero + marquee + Now Playing + Top-Rated films + Top-Rated series |
-| `/details/[type]/[id]` | Movie or TV details (`type` ∈ `movie` \| `tv`) |
+| `/watch-next?type=&mood=&genre=&year=&ratingMin=&runtime=&sort=&page=` | Mood- and filter-driven discovery via TMDB `/discover` |
+| `/details/[type]/[id]` | Movie or TV details (`type` ∈ `movie` \| `tv`); inline note editor when watched |
 | `/person/[id]` | Person profile + filmography |
 | `/results?type=&query=&page=` | Search results, paginated. Empty `query` shows the popular pool. |
-| `/profile` | Signed-in user's saved + watched lists |
+| `/profile` | Signed-in user's watchlist + watched lists, with note previews under each watched poster |
 
 ## Project structure
 
@@ -45,10 +47,10 @@ A school-project movie database. Browse trending films, now-playing, top-rated m
 app/
 ├── layout.tsx                  Root: ThemeProvider, AuthProvider, FontAwesome CSS
 ├── globals.css                 Tailwind v4 + design tokens (--bg, --ink, --accent, …) + utility classes (.cap, .tag, .btn, .pcard, .frame, .field, .display, .modal, .marquee, .noise, .h-scroll)
-├── icon.svg                    Favicon (C-mark)
+├── icon.svg                    Favicon (M-mark)
 ├── page.tsx                    Home
 ├── components/
-│   ├── Navbar.tsx              Sticky header, search, theme toggle, auth entry
+│   ├── Navbar.tsx              Sticky header, Watch Next link, search, theme toggle, auth entry
 │   ├── Footer.tsx              Links + GitHub credit
 │   ├── ThemeProvider.tsx       data-theme on <html>, persisted
 │   ├── AuthProvider.tsx        Supabase auth state via React context
@@ -61,18 +63,21 @@ app/
 │   ├── TrendingHero.tsx        Client: auto-cycling hero
 │   ├── NowPlaying.tsx          Server: fetch + render HRow
 │   ├── TopRated.tsx            Server: two grids (films + series)
-│   ├── LibraryButtons.tsx      Save / Watched action buttons
-│   └── LibraryGrid.tsx         Saved / Watched poster grid for the profile page
+│   ├── LibraryButtons.tsx      Watchlist / Watched buttons + inline note editor when watched
+│   └── LibraryGrid.tsx         Watchlist / Watched poster grid with note previews on watched cards
 ├── details/[type]/[id]/page.tsx
 ├── person/[id]/page.tsx
 ├── results/page.tsx
+├── watch-next/page.tsx         Filter-driven /discover view (mood, genre, year, rating, runtime, sort)
 └── profile/page.tsx
 lib/
 ├── tmdb.ts                     fetch wrapper with the bearer token + 1 h revalidate
 ├── utils.ts                    dateFormatter / ratingFormatter / trimText
 ├── supabase.ts                 Browser-side Supabase client
-└── library.ts                  add / remove / list / get for the library table
-public/                         cineseek-logo SVGs
+├── library.ts                  add / remove / list / get / setNote for the library table
+└── moods.ts                    Mood presets, genre lists, runtime presets, /discover query builder
+public/                         cineseek-logo SVGs (kept from the original prototype)
+supabase/migrations/            SQL migrations applied via the Supabase dashboard or CLI
 ```
 
 ## Getting started
@@ -94,12 +99,15 @@ Create a [TMDB account](https://www.themoviedb.org/), then in **Settings → API
      media_type text not null check (media_type in ('movie', 'tv')),
      status text not null check (status in ('saved', 'watched')),
      added_at timestamptz default now(),
+     note text,
      primary key (user_id, movie_id, media_type)
    );
    alter table library enable row level security;
    create policy "users manage own library" on library
      for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
    ```
+
+   If you set up the project before the note feature, run `supabase/migrations/20260428_library_note.sql` instead — it adds the `note` column to an existing table.
 4. From **Settings → API**, copy the **Project URL** and **anon public** key.
 
 ### 3. Configure local env
@@ -130,12 +138,15 @@ library
 ├── user_id     uuid     FK -> auth.users(id), on delete cascade
 ├── movie_id    int                   TMDB id
 ├── media_type  text                  'movie' | 'tv'
-├── status      text                  'saved' | 'watched'
+├── status      text                  'saved' (= watchlist) | 'watched'
 ├── added_at    timestamptz           default now()
+├── note        text                  free-form, surfaced when status='watched'
 └── PRIMARY KEY (user_id, movie_id, media_type)
 ```
 
-`addToLibrary` / `removeFromLibrary` / `listLibrary(status?)` / `getEntry` live in `lib/library.ts`.
+The `'saved'` status string powers the **Watchlist** UI label; renaming the enum would invalidate existing rows, so the DB string stays the same and only the labels were updated.
+
+`addToLibrary` / `removeFromLibrary` / `listLibrary(status?)` / `getEntry` / `setNote` live in `lib/library.ts`.
 
 ## Design tokens
 
@@ -155,7 +166,7 @@ Legacy `color1`–`color5` and `font-dmSans/raleway/robotoMono/robotoFlex` from 
 
 ## Server vs client components
 
-- **Server**: every page (`app/page.tsx`, `details`, `person`, `results`, `profile` is mostly server-rendered with a small client island), `Trending`, `NowPlaying`, `TopRated`, `Footer`, `PosterCard`, `SectionLabel`, `Avatar`. They `await tmdb(...)` directly with the token kept on the server side.
+- **Server**: every page (`app/page.tsx`, `details`, `person`, `results`, `watch-next`, `profile` is mostly server-rendered with a small client island), `Trending`, `NowPlaying`, `TopRated`, `Footer`, `PosterCard`, `SectionLabel`, `Avatar`. They `await tmdb(...)` directly with the token kept on the server side.
 - **Client (`"use client"`)**: `Navbar`, `TrendingHero`, `HRow`, `AuthProvider`, `AuthModal`, `LibraryButtons`, `LibraryGrid`, `ThemeProvider`. They handle interactivity and Supabase auth state.
 - The home page is `force-dynamic` so production builds don't need a live TMDB token.
 
