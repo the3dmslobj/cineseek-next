@@ -102,6 +102,18 @@ export default function Navbar() {
           </span>
         </Link>
 
+        <Link
+          href="/watch-next"
+          className="cap ulink hidden md:inline-block"
+          style={{
+            color: pathname.startsWith("/watch-next")
+              ? "var(--accent)"
+              : "var(--ink)",
+          }}
+        >
+          WATCH NEXT
+        </Link>
+
         <form
           onSubmit={(e) => {
             e.preventDefault();
